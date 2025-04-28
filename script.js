@@ -401,6 +401,18 @@ document.addEventListener("DOMContentLoaded", function () {
     }, 5000);
   }
   
+  // Add this function near showNewsAlert() or updateUI()
+function boostBiodiversity(amount) {
+  biodiversity += amount;
+  if (biodiversity > 100) biodiversity = 100;
+  updateUI();
+  
+  // Show feedback to the player
+  if (amount >= 1) {
+    showNewsAlert(`Biodiversity increased by ${amount.toFixed(1)}%!`);
+  }
+}
+
   // Add game tips function
   function showGameTip() {
     const tips = [
@@ -786,7 +798,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // Reset metrics but make them more manageable with each level
     forestHealth = 100;
     fireControl = 100;
-    biodiversity = 50 + (currentLevel * 3); // Starting higher - was 40 + (currentLevel * 5)
+    biodiversity = 70 + (currentLevel * 2); // Starting higher - was 40 + (currentLevel * 5)
     if (biodiversity > 100) biodiversity = 100;
     
     // Reset timer with more time for each level
@@ -930,6 +942,11 @@ document.addEventListener("DOMContentLoaded", function () {
     
     // Continue the loop
     animationFrameId = requestAnimationFrame(gameLoop);
+
+    // ADD: Random chance for natural biodiversity increase
+if (Math.random() < 0.02) { // 2% chance per frame
+  boostBiodiversity(0.5);
+}
   }
 
   function checkGameConditions() {
@@ -948,7 +965,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
     
     // Check if level is won (biodiversity high enough with enough trees)
-    if (biodiversity >= 70 && trees.length >= 5 + currentLevel) { // Easier requirement
+    if (biodiversity >= 50 && trees.length >= 5 + currentLevel) { // Easier requirement
       // Level complete!
       document.getElementById("treesSaved").textContent = treesSaved;
       document.getElementById("newGrowth").textContent = newGrowth;
@@ -998,8 +1015,8 @@ document.addEventListener("DOMContentLoaded", function () {
             
             overgrowth.splice(i, 1);
             
-            // Increase biodiversity when overgrowth is cleared properly
-            boostBiodiversity(3.0);
+            // CHANGE: Use the new boost function with a much higher value
+            boostBiodiversity(8.0);
           }
         }
       }
@@ -1047,8 +1064,8 @@ document.addEventListener("DOMContentLoaded", function () {
       }
       
       if (fires[i].ttl <= 0) {
-        // Add biodiversity boost when fires burn out naturally
-        boostBiodiversity(1.5);
+        // ADD: Biodiversity boost when fires burn out naturally
+        boostBiodiversity(3.0);
         
         // Convert to burned area
         burnedAreas.push({
@@ -1058,6 +1075,7 @@ document.addEventListener("DOMContentLoaded", function () {
         });
         
         fires.splice(i, 1);
+  
       } else {
         // Wind influence on fire spread - reduced to make game more manageable
         const spreadDistance = 30 + (windSpeed * 3); // Reduced from 40 + (windSpeed * 4)
@@ -1206,26 +1224,26 @@ document.addEventListener("DOMContentLoaded", function () {
       saplings[i].growth = Math.min(1, (saplings[i].age * growthRate) / 350); // Reduced time to grow
       
       // When fully grown, convert to a tree
-      if (saplings[i].growth >= 1) {
-        trees.push({
-          x: saplings[i].x,
-          y: saplings[i].y,
-          health: 100,
-          age: 1,
-          scale: 0.8,
-          burning: false
-        });
-        
-        saplings.splice(i, 1);
-        treesSaved++;
-        
-        // Increase forest health and biodiversity for new trees
-        forestHealth += 2; // Increased bonus
-        if (forestHealth > 100) forestHealth = 100;
-        
-        boostBiodiversity(2.0); // Boost biodiversity for tree growth
-        updateUI();
-      }
+if (saplings[i].growth >= 1) {
+  trees.push({
+    x: saplings[i].x,
+    y: saplings[i].y,
+    health: 100,
+    age: 1,
+    scale: 0.8,
+    burning: false
+  });
+  
+  saplings.splice(i, 1);
+  treesSaved++;
+  
+  // Increase forest health for new trees
+  forestHealth += 1;
+  if (forestHealth > 100) forestHealth = 100;
+  
+  // ADD: Big biodiversity boost for new trees
+  boostBiodiversity(7.0);
+}
     }
     
     // Natural forest health decline - slower than before
@@ -1245,7 +1263,7 @@ document.addEventListener("DOMContentLoaded", function () {
     if (fireControl > 100) fireControl = 100;
     
     // Natural biodiversity decline due to overgrowth - slower rate
-    let biodiversityDeclineRate = 0.01 * (1 + (currentLevel * 0.05)); // Reduced from 0.02
+    let biodiversityDeclineRate = 0.001 * (1 + (currentLevel * 0.05)); // Reduced from 0.02
     biodiversity -= biodiversityDeclineRate;
     if (biodiversity < 0) biodiversity = 0;
     
