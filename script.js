@@ -182,51 +182,26 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
     // Detect touch devices
-    const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+  const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
   
-    if (isTouchDevice) {
-      // Create mobile controls if they don't exist
-      let mobileControls = document.querySelector('.mobile-controls');
-      if (!mobileControls) {
-        mobileControls = document.createElement('div');
-        mobileControls.className = 'mobile-controls';
-        
-        const burnBtn = document.createElement('button');
-        burnBtn.className = 'burn-btn';
-        burnBtn.textContent = 'BURN';
-        
-        // Add touch event to mobile burn button
-        burnBtn.addEventListener('touchstart', function(e) {
-          e.preventDefault();
-          if (gameScreen.classList.contains("active")) {
-            isDrawing = true;
-            
-            // Create a fire at touch position
-            const rect = forestCanvas.getBoundingClientRect();
-            const touchX = e.touches[0].clientX - rect.left;
-            const touchY = e.touches[0].clientY - rect.top;
-            
-            if (touchX >= 0 && touchX <= forestCanvas.width && touchY >= 0 && touchY <= forestCanvas.height) {
-              createFire(touchX, touchY);
-            }
-          }
-        });
-        
-        burnBtn.addEventListener('touchend', function(e) {
-          e.preventDefault();
-          isDrawing = false;
-        });
-        
-        mobileControls.appendChild(burnBtn);
-        document.getElementById('gameContainer').appendChild(mobileControls);
-      }
+  if (isTouchDevice) {
+    // Create mobile controls if they don't exist
+    let mobileControls = document.querySelector('.mobile-controls');
+    if (!mobileControls) {
+      mobileControls = document.createElement('div');
+      mobileControls.className = 'mobile-controls';
       
-      // Add touch events to the canvas
-      forestCanvas.addEventListener('touchstart', function(e) {
+      const burnBtn = document.createElement('button');
+      burnBtn.className = 'burn-btn';
+      burnBtn.textContent = 'BURN';
+      
+      // Add touch event to mobile burn button
+      burnBtn.addEventListener('touchstart', function(e) {
         e.preventDefault();
         if (gameScreen.classList.contains("active")) {
           isDrawing = true;
           
+          // Create a fire at touch position
           const rect = forestCanvas.getBoundingClientRect();
           const touchX = e.touches[0].clientX - rect.left;
           const touchY = e.touches[0].clientY - rect.top;
@@ -237,42 +212,67 @@ document.addEventListener("DOMContentLoaded", function () {
         }
       });
       
-      forestCanvas.addEventListener('touchmove', function(e) {
-        e.preventDefault();
-        if (isDrawing && gameScreen.classList.contains("active")) {
-          const now = Date.now();
-          const smokeInterval = weatherType === "drought" ? 30 : 50;
-          
-          if (now - lastSmokeTime > smokeInterval) {
-            const rect = forestCanvas.getBoundingClientRect();
-            const touchX = e.touches[0].clientX - rect.left;
-            const touchY = e.touches[0].clientY - rect.top;
-            
-            if (touchX >= 0 && touchX <= forestCanvas.width && touchY >= 0 && touchY <= forestCanvas.height) {
-              // Spawn smoke effect
-              spawnSmoke(e.touches[0].clientX, e.touches[0].clientY);
-              lastSmokeTime = now;
-              
-              // Create fire
-              createFire(touchX, touchY);
-            }
-          }
-        }
-      });
-      
-      forestCanvas.addEventListener('touchend', function(e) {
+      burnBtn.addEventListener('touchend', function(e) {
         e.preventDefault();
         isDrawing = false;
       });
+      
+      mobileControls.appendChild(burnBtn);
+      document.getElementById('gameContainer').appendChild(mobileControls);
     }
     
-    // Call resizeCanvas when the game starts
-    function startGame() {
-      resetGame();
-      startLevel();
-      resizeCanvas(); // Resize canvas before game loop
-      gameLoop();
-    }
+    // Add touch events to the canvas
+    forestCanvas.addEventListener('touchstart', function(e) {
+      e.preventDefault();
+      if (gameScreen.classList.contains("active")) {
+        isDrawing = true;
+        
+        const rect = forestCanvas.getBoundingClientRect();
+        const touchX = e.touches[0].clientX - rect.left;
+        const touchY = e.touches[0].clientY - rect.top;
+        
+        if (touchX >= 0 && touchX <= forestCanvas.width && touchY >= 0 && touchY <= forestCanvas.height) {
+          createFire(touchX, touchY);
+        }
+      }
+    });
+    
+    forestCanvas.addEventListener('touchmove', function(e) {
+      e.preventDefault();
+      if (isDrawing && gameScreen.classList.contains("active")) {
+        const now = Date.now();
+        const smokeInterval = weatherType === "drought" ? 30 : 50;
+        
+        if (now - lastSmokeTime > smokeInterval) {
+          const rect = forestCanvas.getBoundingClientRect();
+          const touchX = e.touches[0].clientX - rect.left;
+          const touchY = e.touches[0].clientY - rect.top;
+          
+          if (touchX >= 0 && touchX <= forestCanvas.width && touchY >= 0 && touchY <= forestCanvas.height) {
+            // Spawn smoke effect
+            spawnSmoke(e.touches[0].clientX, e.touches[0].clientY);
+            lastSmokeTime = now;
+            
+            // Create fire
+            createFire(touchX, touchY);
+          }
+        }
+      }
+    });
+    
+    forestCanvas.addEventListener('touchend', function(e) {
+      e.preventDefault();
+      isDrawing = false;
+    });
+  }
+  
+  // Call resizeCanvas when the game starts
+  function startGame() {
+    resetGame();
+    startLevel();
+    resizeCanvas(); // Resize canvas before game loop
+    gameLoop();
+  }
   
   // Call on load and window resize
   window.addEventListener('resize', resizeCanvas);
@@ -296,7 +296,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
     
     // Keep checking activity
-    inactivityTimeout = setTimeout(checkActivity, 5000);
+    inactivityTimeout = setTimeout(checkActivity, 60000);
   }
 
   // Start activity checker
