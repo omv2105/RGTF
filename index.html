@@ -2,13 +2,14 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>ReGrow the Forest</title>
   <style>
     * {
       user-select: none;
+      box-sizing: border-box;
     }
-
+  
     body {
       margin: 0;
       background-color: #595c4a;
@@ -17,71 +18,76 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      height: 100vh;
+      min-height: 100vh;
       overflow: hidden;
       cursor: none; /* Hide default cursor */
+      padding: 10px;
     }
-
+  
     .screen {
       display: none;
       text-align: center;
+      width: 100%;
+      max-width: 800px;
     }
-
+  
     .screen.active {
       display: block;
     }
-
+  
     .random-image {
       position: absolute;
       transition: transform 0.2s ease-out;
     }
-
+  
     .wave span {
       display: inline-block;
-      font-size: 4em;
+      font-size: clamp(2em, 5vw, 4em); /* Responsive font size */
       font-weight: bold;
       vertical-align: middle;
       transition: transform 0.2s;
     }
-
+  
     .asset {
-      height: 4em;
+      height: clamp(2em, 6vw, 4em); /* Responsive asset size */
       width: auto;
       object-fit: contain;
       transition: transform 0.2s;
     }
-
+  
     .title-container {
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 20px;
+      flex-wrap: wrap; /* Allow wrapping on smaller screens */
     }
-
+  
     .content {
+      width: 100%;
       max-width: 800px;
       padding: 20px;
     }
-
+  
     p {
-      font-size: 1.2em;
+      font-size: clamp(1em, 3vw, 1.2em); /* Responsive font size */
     }
-
+  
     h1 {
-      font-size: 4em;
+      font-size: clamp(2em, 6vw, 4em); /* Responsive font size */
       font-weight: bold;
       cursor: pointer;
     }
-
+  
     #customCursor {
       position: absolute;
-      width: 40px;
-      height: 40px;
+      width: clamp(20px, 5vw, 40px); /* Responsive cursor size */
+      height: clamp(20px, 5vw, 40px);
       pointer-events: none;
       z-index: 9999;
       display: none;
     }
-
+  
     .smoke {
       position: absolute;
       width: 20px;
@@ -109,6 +115,7 @@
       opacity: 0;
       visibility: hidden;
       transition: opacity 0.3s, visibility 0.3s;
+      padding: 10px;
     }
     
     .popup-container.active {
@@ -119,9 +126,9 @@
     .popup {
       background-color: #3a3d2c;
       border-radius: 10px;
-      padding: 30px;
+      padding: clamp(15px, 4vw, 30px); /* Responsive padding */
       max-width: 600px;
-      width: 80%;
+      width: 100%;
       box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
       position: relative;
     }
@@ -129,14 +136,15 @@
     .popup h2 {
       margin-top: 0;
       color: #D9D3BD;
+      font-size: clamp(1.5em, 4vw, 2em); /* Responsive font size */
     }
     
     .start-game-btn {
       background-color: #80836a;
       color: #D9D3BD;
       border: none;
-      padding: 12px 24px;
-      font-size: 1.2em;
+      padding: clamp(8px, 3vw, 12px) clamp(12px, 4vw, 24px); /* Responsive padding */
+      font-size: clamp(1em, 3vw, 1.2em); /* Responsive font size */
       border-radius: 5px;
       cursor: none;
       margin-top: 20px;
@@ -146,24 +154,27 @@
     .start-game-btn:hover {
       background-color: #a18e71;
     }
-
+  
     /* Game styles */
     #gameContainer {
       position: relative;
-      width: 800px;
-      height: 600px;
+      width: 100%;
+      max-width: 800px;
+      aspect-ratio: 4/3; /* Maintain aspect ratio */
       overflow: hidden;
       background-color: #9fa485;
       border-radius: 10px;
       box-shadow: 0 5px 15px #606060;
     }
-
+  
     #forestCanvas {
       position: absolute;
       top: 0;
       left: 0;
+      width: 100%;
+      height: 100%;
     }
-
+  
     .game-ui {
       position: absolute;
       bottom: 20px;
@@ -171,52 +182,56 @@
       width: 100%;
       display: flex;
       justify-content: center;
-      gap: 20px;
+      flex-wrap: wrap; /* Allow wrapping on small screens */
+      gap: clamp(5px, 2vw, 20px); /* Responsive gap */
       z-index: 100;
+      padding: 0 10px;
     }
-
+  
     .ui-panel {
       background-color: rgba(0, 0, 0, 0.5);
-      padding: 10px 20px;
+      padding: clamp(5px, 2vw, 10px) clamp(10px, 3vw, 20px); /* Responsive padding */
       border-radius: 20px;
       display: flex;
       align-items: center;
       gap: 10px;
+      margin-bottom: 5px;
     }
-
+  
     .ui-icon {
-      width: 30px;
-      height: 30px;
+      width: clamp(20px, 5vw, 30px); /* Responsive icon size */
+      height: clamp(20px, 5vw, 30px);
       background-color: #D9D3BD;
       border-radius: 50%;
     }
-
+  
     .progress-container {
       width: 100%;
+      max-width: clamp(100px, 30vw, 150px); /* Responsive width */
       background-color: rgba(255, 255, 255, 0.2);
       border-radius: 10px;
       overflow: hidden;
-      height: 15px;
+      height: clamp(10px, 2vw, 15px); /* Responsive height */
     }
-
+  
     .progress-bar {
       height: 100%;
       border-radius: 10px;
       transition: width 0.3s;
     }
-
+  
     #forestHealth {
       background-color: #bec49f;
     }
-
+  
     #fireControl {
       background-color: #a78988;
     }
-
+  
     #biodiversity {
       background-color: #b6697c;
     }
-
+  
     .forest-element {
       position: absolute;
       background-size: contain;
@@ -224,180 +239,184 @@
       background-position: center bottom;
       transition: transform 0.3s, opacity 0.5s;
     }
-
+  
+    /* Responsive forest elements - scale based on viewport */
     .tree {
-      width: 40px;
-      height: 60px;
+      width: clamp(20px, 5vw, 40px);
+      height: clamp(30px, 7.5vw, 60px);
       background-image: url('tree20.png');
       z-index: 10;
     }
-
+  
     .overgrowth {
-      width: 60px;
-      height: 30px;
+      width: clamp(30px, 7.5vw, 60px);
+      height: clamp(15px, 3.75vw, 30px);
       background-image: url('placeholder-overgrowth.png');
       z-index: 5;
     }
-
+  
     .wildlife {
-      width: 30px;
-      height: 30px;
+      width: clamp(15px, 3.75vw, 30px);
+      height: clamp(15px, 3.75vw, 30px);
       background-image: url('placeholder-wildlife.png');
       z-index: 15;
     }
-
+  
     .sapling {
-      width: 20px;
-      height: 30px;
+      width: clamp(10px, 2.5vw, 20px);
+      height: clamp(15px, 3.75vw, 30px);
       background-image: url('placeholder-sapling.png');
       z-index: 8;
       opacity: 0;
     }
-
+  
     .fire {
-      width: 40px;
-      height: 50px;
+      width: clamp(20px, 5vw, 40px);
+      height: clamp(25px, 6.25vw, 50px);
       background-image: url('placeholder-fire.png');
       z-index: 20;
       opacity: 0;
       pointer-events: none;
     }
-
+  
     .burned {
-      width: 40px;
-      height: 30px;
+      width: clamp(20px, 5vw, 40px);
+      height: clamp(15px, 3.75vw, 30px);
       background-image: url('placeholder-burned.png');
       z-index: 7;
       opacity: 0;
     }
-
+  
     .level-complete {
       position: absolute;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
       background-color: rgba(0, 0, 0, 0.8);
-      padding: 30px;
+      padding: clamp(15px, 4vw, 30px); /* Responsive padding */
       border-radius: 10px;
       text-align: center;
       z-index: 1000;
       display: none;
+      width: 90%;
+      max-width: 400px;
     }
-
+  
     .level-complete h2 {
       color: #D9D3BD;
       margin-top: 0;
+      font-size: clamp(1.5em, 4vw, 2em); /* Responsive font size */
     }
-
+  
     .level-complete p {
       color: #D9D3BD;
     }
-
+  
     .level-btn {
       background-color: #86775f;
       color: #D9D3BD;
       border: none;
-      padding: 10px 20px;
-      font-size: 1em;
+      padding: clamp(8px, 2.5vw, 10px) clamp(15px, 5vw, 20px); /* Responsive padding */
+      font-size: clamp(0.8em, 2.5vw, 1em); /* Responsive font size */
       border-radius: 5px;
       margin-top: 20px;
       cursor: none;
     }
-
+  
     .stats-row {
       display: flex;
       justify-content: space-between;
       margin: 10px 0;
     }
-
+  
     .stat-label {
       text-align: left;
     }
-
+  
     .stat-value {
       text-align: right;
     }
     
     #levelIndicator {
       position: absolute;
-      top: 20px;
-      left: 20px;
+      top: clamp(10px, 2.5vw, 20px); /* Responsive positioning */
+      left: clamp(10px, 2.5vw, 20px);
       background-color: rgba(0, 0, 0, 0.5);
-      padding: 10px 15px;
+      padding: clamp(5px, 1.5vw, 10px) clamp(8px, 2vw, 15px); /* Responsive padding */
       border-radius: 20px;
-      font-size: 1.2em;
+      font-size: clamp(0.9em, 2.25vw, 1.2em); /* Responsive font size */
       z-index: 100;
     }
     
     .fire-particle {
       position: absolute;
-      width: 8px;
-      height: 8px;
+      width: clamp(4px, 1vw, 8px); /* Responsive size */
+      height: clamp(4px, 1vw, 8px);
       background-color: orange;
       border-radius: 50%;
       filter: blur(2px);
       z-index: 25;
       pointer-events: none;
     }
-
-    /* New stressful elements */
+  
+    /* New stressful elements - made responsive */
     #timerBar {
       position: absolute;
-      top: 20px;
-      right: 20px;
-      width: 200px;
-      height: 20px;
+      top: clamp(10px, 2.5vw, 20px);
+      right: clamp(10px, 2.5vw, 20px);
+      width: clamp(120px, 25vw, 200px); /* Responsive width */
+      height: clamp(12px, 2.5vw, 20px); /* Responsive height */
       background-color: rgba(0, 0, 0, 0.5);
       border-radius: 10px;
       overflow: hidden;
       z-index: 100;
     }
-
+  
     #timerFill {
       height: 100%;
       background-color: #F44336;
       width: 100%;
       transition: width 0.1s linear;
     }
-
+  
     .emergency-warning {
       position: absolute;
-      top: 60px;
+      top: clamp(40px, 7.5vw, 60px);
       left: 0;
       width: 100%;
       text-align: center;
       color: #88504c;
-      font-size: 1.5em;
+      font-size: clamp(1.2em, 3vw, 1.5em); /* Responsive font size */
       font-weight: bold;
       text-shadow: 0 0 5px #000;
       animation: blink 0.5s infinite;
       display: none;
       z-index: 100;
     }
-
+  
     @keyframes blink {
       0% { opacity: 1; }
       50% { opacity: 0.3; }
       100% { opacity: 1; }
     }
-
+  
     .wind-indicator {
       position: absolute;
-      top: 60px;
-      right: 20px;
+      top: clamp(40px, 7.5vw, 60px);
+      right: clamp(10px, 2.5vw, 20px);
       background-color: rgba(0, 0, 0, 0.5);
-      padding: 8px 15px;
+      padding: clamp(4px, 1vw, 8px) clamp(8px, 2vw, 15px); /* Responsive padding */
       border-radius: 20px;
-      font-size: 1em;
+      font-size: clamp(0.8em, 2vw, 1em); /* Responsive font size */
       z-index: 100;
       display: flex;
       align-items: center;
       gap: 10px;
     }
-
+  
     .wind-arrow {
-      width: 20px;
-      height: 20px;
+      width: clamp(15px, 3vw, 20px); /* Responsive size */
+      height: clamp(15px, 3vw, 20px);
       transform-origin: center;
       transition: transform 1s ease;
       display: flex;
@@ -422,7 +441,7 @@
     .drought-effect {
       background: radial-gradient(circle, rgba(255,156,0,0.2) 0%, rgba(255,123,0,0.1) 100%);
     }
-
+  
     .lightning-flash {
       position: absolute;
       width: 100%;
@@ -450,12 +469,12 @@
       90% { transform: translate(-5px, 5px) }
       100% { transform: translate(0, 0) }
     }
-
+  
     .animal-warning {
       position: absolute;
       color: #FFD700;
       font-weight: bold;
-      font-size: 14px;
+      font-size: clamp(10px, 2vw, 14px); /* Responsive font size */
       z-index: 110;
       text-shadow: 0 0 3px #000;
       pointer-events: none;
@@ -463,14 +482,14 @@
     
     .news-alert {
       position: absolute;
-      bottom: 80px;
-      left: 20px;
-      right: 20px;
+      bottom: clamp(60px, 10vw, 80px);
+      left: clamp(10px, 2.5vw, 20px);
+      right: clamp(10px, 2.5vw, 20px);
       background-color: rgba(0, 0, 0, 0.7);
       color: white;
-      padding: 10px;
+      padding: clamp(5px, 1.5vw, 10px); /* Responsive padding */
       border-radius: 5px;
-      font-size: 0.9em;
+      font-size: clamp(0.8em, 2vw, 0.9em); /* Responsive font size */
       z-index: 150;
       transform: translateY(100px);
       opacity: 0;
@@ -481,24 +500,110 @@
       transform: translateY(0);
       opacity: 1;
     }
-
+  
     #gameOverScreen {
-  z-index: 1001;
-}
-
-#gameOverScreen .popup {
-  background-color: #883a39;
-  border: 3px solid #5a2827;
-  max-width: 500px;
-  width: 90%;
-}
-
-.popup-container .popup h2 {
-  margin-top: 0;
-  font-size: 2em;
-  color: #fef2e4;
-  text-shadow: 0 2px 4px rgba(0,0,0,0.5);
-}
+      z-index: 1001;
+    }
+  
+    #gameOverScreen .popup {
+      background-color: #883a39;
+      border: 3px solid #5a2827;
+      max-width: 90%;
+      width: clamp(280px, 90%, 500px); /* Responsive width */
+    }
+  
+    .popup-container .popup h2 {
+      margin-top: 0;
+      font-size: clamp(1.5em, 4vw, 2em); /* Responsive font size */
+      color: #fef2e4;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    }
+    
+    /* Touch controls for mobile devices */
+    .mobile-controls {
+      display: none; /* Hidden by default, shown only on touch devices */
+      position: absolute;
+      bottom: 10px;
+      left: 0;
+      width: 100%;
+      z-index: 200;
+      justify-content: center;
+      padding: 10px;
+    }
+    
+    .burn-btn {
+      background-color: #d35400;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      box-shadow: 0 3px 6px rgba(0,0,0,0.3);
+    }
+    
+    /* Media queries for different screen sizes */
+    @media (max-width: 600px) {
+      .game-ui {
+        flex-direction: column;
+        align-items: center;
+        bottom: 60px; /* Make room for mobile controls */
+      }
+      
+      .ui-panel {
+        width: 90%;
+        justify-content: space-between;
+      }
+      
+      .progress-container {
+        max-width: 60vw;
+      }
+      
+      /* Show mobile controls on small screens */
+      .mobile-controls {
+        display: flex;
+      }
+    }
+    
+    /* For very small screens */
+    @media (max-width: 360px) {
+      body {
+        padding: 5px;
+      }
+      
+      #gameContainer {
+        aspect-ratio: 1/1; /* Squarer aspect ratio for very small screens */
+      }
+    }
+    
+    /* For tablets and larger screens */
+    @media (min-width: 768px) {
+      .game-ui {
+        bottom: 30px;
+      }
+      
+      .ui-panel {
+        padding: 10px 20px;
+      }
+      
+      .wave span {
+        font-size: 3.5em;
+      }
+    }
+    
+    /* For touch devices */
+    @media (hover: none) and (pointer: coarse) {
+      body {
+        cursor: auto; /* Show regular cursor on touch devices */
+      }
+      
+      #customCursor {
+        display: none !important; /* Never show custom cursor on touch devices */
+      }
+    }
   </style>
 </head>
 
