@@ -1,4 +1,5 @@
 document.addEventListener("DOMContentLoaded", function () {
+
   const splashScreen = document.getElementById("splashScreen");
   const newScreen = document.getElementById("newScreen");
   const instructionsScreen = document.getElementById("instructionsScreen");
@@ -94,6 +95,188 @@ document.addEventListener("DOMContentLoaded", function () {
   // Fix for blank screen issue - Add activity tracking
   let lastInteractionTime = Date.now();
   let inactivityTimeout;
+
+  function resizeCanvas() {
+    const gameContainer = document.getElementById("gameContainer");
+    const forestCanvas = document.getElementById("forestCanvas");
+    
+    if (gameContainer && forestCanvas) {
+      // Get container dimensions
+      const containerWidth = gameContainer.clientWidth;
+      const containerHeight = gameContainer.clientHeight;
+      
+      // Store old dimensions to calculate scaling
+      const oldWidth = forestCanvas.width;
+      const oldHeight = forestCanvas.height;
+      
+      // Set canvas dimensions to match container
+      forestCanvas.width = containerWidth;
+      forestCanvas.height = containerHeight;
+      
+      // Calculate scaling factors
+      const scaleX = containerWidth / (oldWidth || 800);
+      const scaleY = containerHeight / (oldHeight || 600);
+      
+      // Rescale all game elements if they exist
+      if (typeof trees !== 'undefined' && trees.length > 0) {
+        // Rescale tree positions
+        trees.forEach(tree => {
+          if (oldWidth && oldHeight) {
+            tree.x = tree.x * scaleX;
+            tree.y = tree.y * scaleY;
+          }
+        });
+        
+        // Rescale other game elements
+        if (typeof overgrowth !== 'undefined') {
+          overgrowth.forEach(brush => {
+            if (oldWidth && oldHeight) {
+              brush.x = brush.x * scaleX;
+              brush.y = brush.y * scaleY;
+            }
+          });
+        }
+        
+        if (typeof wildlife !== 'undefined') {
+          wildlife.forEach(animal => {
+            if (oldWidth && oldHeight) {
+              animal.x = animal.x * scaleX;
+              animal.y = animal.y * scaleY;
+            }
+          });
+        }
+        
+        if (typeof saplings !== 'undefined') {
+          saplings.forEach(sapling => {
+            if (oldWidth && oldHeight) {
+              sapling.x = sapling.x * scaleX;
+              sapling.y = sapling.y * scaleY;
+            }
+          });
+        }
+        
+        if (typeof fires !== 'undefined') {
+          fires.forEach(fire => {
+            if (oldWidth && oldHeight) {
+              fire.x = fire.x * scaleX;
+              fire.y = fire.y * scaleY;
+            }
+          });
+        }
+        
+        if (typeof burnedAreas !== 'undefined') {
+          burnedAreas.forEach(area => {
+            if (oldWidth && oldHeight) {
+              area.x = area.x * scaleX;
+              area.y = area.y * scaleY;
+            }
+          });
+        }
+      }
+      
+      // Redraw if game is active
+      if (gameScreen.classList.contains("active") && typeof drawForest === 'function') {
+        drawForest();
+      }
+    }
+  }
+
+    // Detect touch devices
+    const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+  
+    if (isTouchDevice) {
+      // Create mobile controls if they don't exist
+      let mobileControls = document.querySelector('.mobile-controls');
+      if (!mobileControls) {
+        mobileControls = document.createElement('div');
+        mobileControls.className = 'mobile-controls';
+        
+        const burnBtn = document.createElement('button');
+        burnBtn.className = 'burn-btn';
+        burnBtn.textContent = 'BURN';
+        
+        // Add touch event to mobile burn button
+        burnBtn.addEventListener('touchstart', function(e) {
+          e.preventDefault();
+          if (gameScreen.classList.contains("active")) {
+            isDrawing = true;
+            
+            // Create a fire at touch position
+            const rect = forestCanvas.getBoundingClientRect();
+            const touchX = e.touches[0].clientX - rect.left;
+            const touchY = e.touches[0].clientY - rect.top;
+            
+            if (touchX >= 0 && touchX <= forestCanvas.width && touchY >= 0 && touchY <= forestCanvas.height) {
+              createFire(touchX, touchY);
+            }
+          }
+        });
+        
+        burnBtn.addEventListener('touchend', function(e) {
+          e.preventDefault();
+          isDrawing = false;
+        });
+        
+        mobileControls.appendChild(burnBtn);
+        document.getElementById('gameContainer').appendChild(mobileControls);
+      }
+      
+      // Add touch events to the canvas
+      forestCanvas.addEventListener('touchstart', function(e) {
+        e.preventDefault();
+        if (gameScreen.classList.contains("active")) {
+          isDrawing = true;
+          
+          const rect = forestCanvas.getBoundingClientRect();
+          const touchX = e.touches[0].clientX - rect.left;
+          const touchY = e.touches[0].clientY - rect.top;
+          
+          if (touchX >= 0 && touchX <= forestCanvas.width && touchY >= 0 && touchY <= forestCanvas.height) {
+            createFire(touchX, touchY);
+          }
+        }
+      });
+      
+      forestCanvas.addEventListener('touchmove', function(e) {
+        e.preventDefault();
+        if (isDrawing && gameScreen.classList.contains("active")) {
+          const now = Date.now();
+          const smokeInterval = weatherType === "drought" ? 30 : 50;
+          
+          if (now - lastSmokeTime > smokeInterval) {
+            const rect = forestCanvas.getBoundingClientRect();
+            const touchX = e.touches[0].clientX - rect.left;
+            const touchY = e.touches[0].clientY - rect.top;
+            
+            if (touchX >= 0 && touchX <= forestCanvas.width && touchY >= 0 && touchY <= forestCanvas.height) {
+              // Spawn smoke effect
+              spawnSmoke(e.touches[0].clientX, e.touches[0].clientY);
+              lastSmokeTime = now;
+              
+              // Create fire
+              createFire(touchX, touchY);
+            }
+          }
+        }
+      });
+      
+      forestCanvas.addEventListener('touchend', function(e) {
+        e.preventDefault();
+        isDrawing = false;
+      });
+    }
+    
+    // Call resizeCanvas when the game starts
+    function startGame() {
+      resetGame();
+      startLevel();
+      resizeCanvas(); // Resize canvas before game loop
+      gameLoop();
+    }
+  
+  // Call on load and window resize
+  window.addEventListener('resize', resizeCanvas);
+  window.addEventListener('orientationchange', resizeCanvas);
 
   function checkActivity() {
     const now = Date.now();
